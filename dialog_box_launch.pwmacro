@@ -1,0 +1,10 @@
+version "6.0"
+#========================================================
+# ---- InnovMetric Software Inc.
+# ---- Module  :    PolyWorks|Inspector
+# ---- Version :    2023 IR3.1 (build 3335)
+# ---- Date    :    mercredi 13 septembre 2023 - 15:16:12
+#--------------------------------------------------------
+
+
+MACRO EXEC ( "${_USERCONFIG_PATH}\macro\iminspect\dialog_box.pwmacro", )

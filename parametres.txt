@@ -1,0 +1,24 @@
+/!\ ATTENTION /!\
+NE MODIFIER EN AUCUN CAS LES POSITIONS DES LIGNES DANS LE FICHIER
+UTILISER UN ESPACE POUR SEPARER LES DIFFERENTES VALEURS
+SI UNE VALEUR CONTIENT UN ESPACE, REMPLACER CELUI-CI PAR UN "_"
+
+xsi:type baan
+idcmms SN05_RECETTE_SIGMA_AP
+name SN05_RECETTE_SIGMA_AP
+versionXSD SigmaCollect_v1.0.3.11.xsd
+version 1.0.3
+id A_DEFINIR
+type internal
+factory GEN
+workshop_name IBGUA
+
+del001 del002 del003
+
+delesteurA delesteurB delesteurC nouveau_delesteur
+
+001 002 003
+
+/!\ ATTENTION /!\
+UTILISEZ UN "!_!" POUR SEPARER LES VALEURS SUR LA LIGNE SUIVANTE
+Validation process!_!Prélèvement sans corrélation / Traitement anomalie!_!Prélèvement avec corrélation

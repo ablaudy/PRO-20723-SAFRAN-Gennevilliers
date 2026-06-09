@@ -1,0 +1,173 @@
+version "6.0"
+#======================================================
+# ---- InnovMetric Software Inc.
+# ---- Module  :    PolyWorks|Inspector
+# ---- Version :    2023 IR8.1 (build 4772)
+# ---- Date    :    vendredi 25 octobre 2024 - 09:05:00
+#------------------------------------------------------
+
+
+DECLARE txtFile "C:\Users\Antoine\Documents\Customization Project\Projects\PRO-5968 - SAE Genevilliers - Export Resultats  XML\Dev\input_excel.txt"
+DECLARE vbModifsExcel "C:\Users\Antoine\Documents\Customization Project\Projects\PRO-5968 - SAE Genevilliers - Export Resultats  XML\Dev\Macro\ModifyExcelFile.vbs"
+DECLARE vbSaveExcel "C:\Users\Antoine\Documents\Customization Project\Projects\PRO-5968 - SAE Genevilliers - Export Resultats  XML\Dev\Macro\SaveExcelWorkbookAs.vbs"
+DECLARE template "C:\Users\Antoine\Documents\Customization Project\Projects\PRO-5968 - SAE Genevilliers - Export Resultats  XML\Feuille de corrélation dimensionnelle.xlsx"
+DECLARE nomFichierExport
+
+
+DECLARE listFeature
+DECLARE controlNames
+DECLARE controlNumber
+DECLARE controlValue
+DECLARE excelLine
+
+DECLARE numDelesteur
+DECLARE delesteur
+DECLARE dateUsi
+DECLARE dateCtrl
+DECLARE OF
+DECLARE ctrlDim
+DECLARE ref
+DECLARE indPlan
+DECLARE serial
+DECLARE prelevement
+
+
+#DECLARE diagBox
+#DECLARE btnValid
+#DECLARE correlation
+#DECLARE conformite
+#DECLARE conformiteLight
+
+
+DECLARE globalCounter
+DECLARE controlCounter
+
+DATA_FILE CREATE ( $txtFile, , "Yes" )
+
+TREEVIEW FEATURE NAME ALL GET ( listFeature, "On", "On" )
+SET globalCounter 0
+
+WHILE $globalCounter < SIZE(listFeature)
+    
+    ++globalCounter
+    MEASURE CONTROL NAME ALL GET ( controlNames, $listFeature[$globalCounter] )
+    
+    SET controlCounter 0
+    
+    WHILE $controlCounter < SIZE(controlNames)
+        
+        ++controlCounter
+        MEASURE CONTROL CHARACTERISTIC_NUMBER GET ( $controlNames[$controlCounter], controlNumber, $listFeature[$globalCounter] )
+        MEASURE CONTROL MEASURED GET ( $controlNames[$controlCounter], controlValue, $listFeature[$globalCounter] )
+        
+        IF $controlNumber >= 1 AND $controlNumber <= 35
+            
+            SET excelLine EXPR ( $controlNumber + 6 )
+            
+            DATA_FILE APPEND LINE ( $txtFile, "H${excelLine}!_!${controlValue}")
+            
+        ELSEIF $controlNumber == 36
+            
+            DATA_FILE APPEND LINE ( $txtFile, "H44!_!${controlValue}")
+            
+        ELSEIF $controlNumber >= 37 AND $controlNumber <= 41
+            
+            SET excelLine EXPR ( $controlNumber + 11 )
+            
+            DATA_FILE APPEND LINE ( $txtFile, "H${excelLine}!_!${controlValue}")
+            
+            #        ELSEIF $controlNumber >= 30 AND $controlNumber <= 55
+            #            
+            #            SET excelLine EXPR ( $controlNumber + 27 )
+            #            
+            #            DATA_FILE APPEND LINE ( $txtFile, "I${excelLine}!_!${controlValue}")
+            #            
+            #        ELSEIF $controlNumber == 56
+            #            
+            #            DATA_FILE APPEND LINE ( $txtFile, "I85!_!${controlValue}")
+            #            
+            #        ELSEIF $controlNumber >= 57 AND $controlNumber <= 60
+            #            
+            #            SET excelLine EXPR ( $controlNumber + 22 )
+            #            
+            #            DATA_FILE APPEND LINE ( $txtFile, "I${excelLine}!_!${controlValue}")
+            
+            
+        ENDIF
+        
+        
+        
+    ENDWHILE
+    
+    
+    
+ENDWHILE
+
+
+PIECE PROPERTIES CUSTOM GET ( , "N° DC Délesteur", numDelesteur )
+DATA_FILE APPEND LINE ( $txtFile, "B3!_!${numDelesteur}")
+
+PIECE PROPERTIES CUSTOM GET ( , "Delesteur", delesteur )
+DATA_FILE APPEND LINE ( $txtFile, "B4!_!${delesteur}")
+
+PIECE PROPERTIES CUSTOM GET ( , "Date Usinage", dateUsi )
+DATA_FILE APPEND LINE ( $txtFile, "E3!_!${dateUsi}")
+
+PIECE PROPERTIES CUSTOM GET ( , "Date Contrôle", dateCtrl )
+DATA_FILE APPEND LINE ( $txtFile, "J3!_!${dateCtrl}")
+
+PIECE PROPERTIES CUSTOM GET ( , "Ordre Fab", OF )
+DATA_FILE APPEND LINE ( $txtFile, "J5!_!${OF}")
+
+PIECE PROPERTIES CUSTOM GET ( , "Contrôle Dim", ctrlDim )
+IF $ctrlDim == "Avant Macro"
+    DATA_FILE APPEND LINE ( $txtFile, "F4!_!X")
+    DATA_FILE APPEND LINE ( $txtFile, "F5!_! ")
+ELSE
+    DATA_FILE APPEND LINE ( $txtFile, "F4!_! ")
+    DATA_FILE APPEND LINE ( $txtFile, "F5!_!X")
+ENDIF
+
+#PIECE PROPERTIES CUSTOM GET ( , "Identifiant Gamme", ref )
+#DATA_FILE APPEND LINE ( $txtFile, "B2!_!${ref}")
+
+PIECE PROPERTIES CUSTOM GET ( , "Indice Plan", indPlan )
+DATA_FILE APPEND LINE ( $txtFile, "J2!_!Indice du plan sur OF : ${indPlan}")
+
+PIECE PROPERTIES CUSTOM GET ( , "Serial", serial )
+DATA_FILE APPEND LINE ( $txtFile, "B5!_!${serial}")
+
+PIECE PROPERTIES CUSTOM GET ( , "Prélèvement", prelevement )
+DATA_FILE APPEND LINE ( $txtFile, "J4!_!${prelevement}")
+
+
+#MACRO INPUT DIALOG_BOX DEFINE ( diagBox, "Type rapport" )
+#MACRO INPUT DIALOG_BOX LABEL ( $diagBox, "Choisissez le type de rapport à remplir : " )
+#MACRO INPUT DIALOG_BOX CHECKBOX ( $diagBox, "Corrélation", "Off" )
+#MACRO INPUT DIALOG_BOX CHECKBOX ( $diagBox, "Conformité_allégée", "Off" )
+#MACRO INPUT DIALOG_BOX CHECKBOX ( $diagBox, "Conformité", "Off" )
+#MACRO INPUT DIALOG_BOX SHOW ( $diagBox, "Confirmer", "Annuler", btnValid, correlation, conformiteLight, conformite  )
+
+#IF $btnValid == 0
+#    
+#    MACRO END
+#    
+#ENDIF
+
+
+MACRO INPUT STRING (nomFichierExport, "Nom Fichier Excel Rapport", "Veuillez indiquer le nom du fichier de rapport", "NomRapport" )
+
+DECLARE fichierExport "C:\Users\Antoine\Documents\Customization Project\Projects\PRO-5968 - SAE Genevilliers - Export Resultats  XML\${nomFichierExport}.xlsx"
+
+
+
+
+
+
+SYSTEM COMMAND EXEC SYNC ( $vbSaveExcel, {$template, $fichierExport, "Message", "No installation of Microsoft Excel was found on your computer.", "No installation of Microsoft Excel was found on your computer."}  )
+
+MACRO PAUSE ( "Ajout Référence dans Rapport", "Pensez à préciser la référence (case B2) dans le fichier de rapport : ${fichierExport}")
+
+
+SYSTEM COMMAND EXEC SYNC ( $vbModifsExcel,{$fichierExport, "Corrélation",$txtFile},  )
+

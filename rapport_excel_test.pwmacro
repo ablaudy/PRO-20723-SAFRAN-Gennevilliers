@@ -1,0 +1,10 @@
+version "6.0"
+#========================================================
+# ---- InnovMetric Software Inc.
+# ---- Module  :    PolyWorks|Inspector
+# ---- Version :    2023 IR3.1 (build 3335)
+# ---- Date    :    vendredi 15 septembre 2023 - 11:15:56
+#--------------------------------------------------------
+
+
+SYSTEM COMMAND EXEC SYNC ( "C:\Users\Antoine\Documents\Customization Project\Projects\PRO-5968 - SAE Genevilliers - Export Resultats  XML\Dev\Macro\ModifyExcelFile.vbs", {"C:\Users\Antoine\Documents\Customization Project\Projects\PRO-5968 - SAE Genevilliers - Export Resultats  XML\Dev\Macro\macro_XML_tests.xlsx", "Sheet1", "C:\Users\Antoine\Documents\Customization Project\Projects\PRO-5968 - SAE Genevilliers - Export Resultats  XML\Dev\Macro\resultats.txt"}, )

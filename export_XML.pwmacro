@@ -1,0 +1,230 @@
+version "6.0"
+#==================================================
+# ---- InnovMetric Software Inc.
+# ---- Module  :    PolyWorks|Inspector
+# ---- Version :    2022 IR10 (build 5524)
+# ---- Date    :    mercredi 31 mai 2023 - 15:13:28
+#--------------------------------------------------
+
+DECLARE XMLFileName
+DECLARE XMLFilePath 
+DECLARE parameterFile "C:\Users\Antoine\Documents\Customization Project\Projects\PRO-5968 - SAE Genevilliers - Export Resultats  XML\Dev\Macro\parametres.txt"
+DECLARE xsiType
+DECLARE OF
+DECLARE ref
+DECLARE OP
+DECLARE codeGamme
+DECLARE versionGamme
+DECLARE taskcode
+DECLARE serial
+DECLARE idcmms
+DECLARE name
+DECLARE dateCtrl
+DECLARE endTime
+DECLARE annee
+DECLARE mois
+DECLARE jour
+DECLARE heure
+DECLARE minutes
+DECLARE secondes
+DECLARE dateUsi
+DECLARE indicePlan
+DECLARE numDelesteur
+DECLARE delesteur
+DECLARE ctrlDim
+DECLARE prelevement
+DECLARE repere
+DECLARE versionXSD
+DECLARE version
+DECLARE id
+DECLARE type
+DECLARE factory
+DECLARE workshopName
+
+
+DATA_FILE READ LINE_FIELD ( $parameterFile, 6, 2, xsiType, " ", "Off" )
+
+DATA_FILE READ LINE_FIELD ( $parameterFile, 9, 2, versionXSD, " ", "Off" )
+
+DATA_FILE READ LINE_FIELD ( $parameterFile, 10, 2, version, " ", "Off" )
+DATA_FILE READ LINE_FIELD ( $parameterFile, 11, 2, id, " ", "Off" )
+DATA_FILE READ LINE_FIELD ( $parameterFile, 12, 2, type, " ", "Off" )
+DATA_FILE READ LINE_FIELD ( $parameterFile, 13, 2, factory, " ", "Off" )
+DATA_FILE READ LINE_FIELD ( $parameterFile, 14, 2, workshopName, " ", "Off" )
+
+
+
+PIECE PROPERTIES CUSTOM GET ( , "Ordre Fab", OF )
+
+PIECE PROPERTIES CUSTOM GET ( , "Référence", ref )
+
+PIECE PROPERTIES CUSTOM GET ( , "OP", OP )
+
+PIECE PROPERTIES CUSTOM GET ( , "Code Gamme", codeGamme )
+
+PIECE PROPERTIES CUSTOM GET ( , "Version Gamme", versionGamme )
+
+SET taskcode "${ref}_${codeGamme}_${versionGamme}"
+
+PIECE PROPERTIES CUSTOM GET ( , "Serial", serial )
+
+PIECE PROPERTIES CUSTOM GET ( , "Date Contrôle", dateCtrl )
+
+SYSTEM DATE_TIME GET ( annee, mois, jour, heure, minutes, secondes)
+
+IF EXPR ( 9 - $mois ) >= 0
+    
+    SET mois "0${mois}"
+    
+ELSEIF EXPR ( 9 - $jour ) >= 0
+    
+    SET jour "0${jour}"
+    
+ELSEIF EXPR ( 9 - $heure ) >= 0
+    
+    SET heure "0${heure}"
+    
+ELSEIF EXPR ( 9 - $minutes ) >= 0
+    
+    SET minutes "0${minutes}"
+    
+ELSEIF EXPR ( 9 - $secondes ) >= 0
+    
+    SET secondes "0${secondes}"
+    
+ENDIF
+
+SET endTime "${annee}-${mois}-${jour}T${heure}:${minutes}:${secondes}"
+
+
+SET XMLFileName "SIGMA_REF${ref}_OF${OF}_OP${OP}_SN${serial}_${annee}${mois}${jour}${heure}${minutes}${secondes}.xml"
+
+
+#CHEMIN EXPORT FICHIER (A MODIFIER)
+SET XMLFilePath "C:\Users\Antoine\Documents\Customization Project\Projects\PRO-5968 - SAE Genevilliers - Export Resultats  XML\Dev\Export\${XMLFileName}"
+
+
+DATA_FILE CREATE ( $XMLFilePath, "Ascii", "Yes" )
+
+#1
+DATA_FILE APPEND ( $XMLFilePath, "<?xml version= ${_QUOTES}1.0${_QUOTES} encoding=${_QUOTES}UTF-8${_QUOTES}?>${_NEWLINE}" )
+
+#2
+DATA_FILE APPEND ( $XMLFilePath, "<sigmacollect gendatetime=${_QUOTES}${dateCtrl}+02:00${_QUOTES}" )
+DATA_FILE APPEND ( $XMLFilePath, "filename=${_QUOTES}${XMLFileName}${_QUOTES}")
+DATA_FILE APPEND ( $XMLFilePath, "xsi:noNamespaceSchemaLocation=${_QUOTES}${versionXSD}${_QUOTES}" )
+DATA_FILE APPEND ( $XMLFilePath, "version=${_QUOTES}${version}${_QUOTES} xmlns:xsi=${_QUOTES}http://www.w3.org/2001/XMLSchema-instance${_QUOTES}>${_NEWLINE}")
+
+#3
+DATA_FILE APPEND ( $XMLFilePath, "<partner id=${_QUOTES}${id}${_QUOTES}")
+DATA_FILE APPEND ( $XMLFilePath, "type=${_QUOTES}${type}${_QUOTES}")
+DATA_FILE APPEND ( $XMLFilePath, "factory=${_QUOTES}${factory}${_QUOTES}  />${_NEWLINE}" )
+
+#4
+DATA_FILE APPEND ( $XMLFilePath, "<workshop name=${_QUOTES}${workshopName}${_QUOTES} />${_NEWLINE}")
+
+#5
+DATA_FILE APPEND ( $XMLFilePath, "<joborder xsi:type=${_QUOTES}${xsiType}${_QUOTES}")
+DATA_FILE APPEND ( $XMLFilePath, "id=${_QUOTES}${OF}${_QUOTES}")
+DATA_FILE APPEND ( $XMLFilePath, "partidproduct=${_QUOTES}${ref}${_QUOTES}")
+DATA_FILE APPEND ( $XMLFilePath, "mgmtope=${_QUOTES}${OP}${_QUOTES}")
+DATA_FILE APPEND ( $XMLFilePath, "taskcode=${_QUOTES}${taskcode}${_QUOTES} >${_NEWLINE}")
+
+#6
+DATA_FILE APPEND ( $XMLFilePath, "<serials>${_NEWLINE}" )
+
+#7
+DATA_FILE APPEND ( $XMLFilePath, "${_TAB}<serial value=${_QUOTES}${serial}${_QUOTES} />${_NEWLINE}" )
+
+#8
+DATA_FILE APPEND ( $XMLFilePath, "</serials>${_NEWLINE}" )
+
+#9
+DATA_FILE APPEND ( $XMLFilePath, "</joborder>${_NEWLINE}" )
+
+#10
+DATA_FILE READ LINE_FIELD ( $parameterFile, 7, 2, idcmms, " ", "Off" )
+DATA_FILE APPEND ( $XMLFilePath, "<machine idcmms=${_QUOTES}${idcmms}${_QUOTES}")
+DATA_FILE READ LINE_FIELD ( $parameterFile, 8, 2, name, " ", "Off" )
+DATA_FILE APPEND ( $XMLFilePath, "name=${_QUOTES}${name}${_QUOTES}></machine>${_NEWLINE}")
+
+#11
+DATA_FILE APPEND ( $XMLFilePath, "<recipe name=${_QUOTES}${codeGamme}${_QUOTES}")
+DATA_FILE APPEND ( $XMLFilePath, "version=${_QUOTES}${versionGamme}${_QUOTES}>${_NEWLINE}")
+
+#12
+DATA_FILE APPEND ( $XMLFilePath, "</recipe>${_NEWLINE}" )
+
+#13
+DATA_FILE APPEND ( $XMLFilePath, "<cycle starttime=${_QUOTES}${dateCtrl}+02:00${_QUOTES}")
+DATA_FILE APPEND ( $XMLFilePath, "endtime=${_QUOTES}${endTime}+02:00${_QUOTES}>${_NEWLINE}")
+
+#14
+DATA_FILE APPEND ( $XMLFilePath, "<parameters>${_NEWLINE}" )
+
+
+#PARAMETERS
+
+PIECE PROPERTIES CUSTOM GET ( , "Date Usinage", dateUsi )
+DATA_FILE APPEND ( $XMLFilePath, "<parameter xsi:type=${_QUOTES}datescalar${_QUOTES} name=${_QUOTES}DATE_USINAGE${_QUOTES} value=${_QUOTES}${dateUsi}${_QUOTES}/>${_NEWLINE}",)
+
+PIECE PROPERTIES CUSTOM GET ( , "Indice Plan", indicePlan )
+DATA_FILE APPEND ( $XMLFilePath, "<parameter xsi:type=${_QUOTES}stringscalar${_QUOTES} name=${_QUOTES}INDICE_PLAN${_QUOTES} value=${_QUOTES}${indicePlan}${_QUOTES}/>${_NEWLINE}",)
+
+PIECE PROPERTIES CUSTOM GET ( , "N° DC Délesteur", numDelesteur )
+DATA_FILE APPEND ( $XMLFilePath, "<parameter xsi:type=${_QUOTES}stringscalar${_QUOTES} name=${_QUOTES}NUMERO_DC_DELESTEUR${_QUOTES} value=${_QUOTES}${numDelesteur}${_QUOTES}/>${_NEWLINE}",)
+
+PIECE PROPERTIES CUSTOM GET ( , "Contrôle Dim", ctrlDim )
+DATA_FILE APPEND ( $XMLFilePath, "<parameter xsi:type=${_QUOTES}stringscalar${_QUOTES} name=${_QUOTES}CONTROLE_DIM${_QUOTES} value=${_QUOTES}${ctrlDim}${_QUOTES}/>${_NEWLINE}",)
+
+PIECE PROPERTIES CUSTOM GET ( , "Prélèvement", prelevement )
+DATA_FILE APPEND ( $XMLFilePath, "<parameter xsi:type=${_QUOTES}stringscalar${_QUOTES} name=${_QUOTES}ORIGINE_PRELEVEMENT${_QUOTES} value=${_QUOTES}${prelevement}${_QUOTES}/>${_NEWLINE}",)
+
+PIECE PROPERTIES CUSTOM GET ( , "Repère", repere )
+DATA_FILE APPEND ( $XMLFilePath, "<parameter xsi:type=${_QUOTES}stringscalar${_QUOTES} name=${_QUOTES}REPERE${_QUOTES} value=${_QUOTES}${repere}${_QUOTES}/>${_NEWLINE}",)
+
+
+
+
+
+DECLARE featureList
+DECLARE i 0
+DECLARE j 0
+DECLARE ctrlList
+DECLARE ctrlName
+DECLARE upperTol
+DECLARE lowerTol
+DECLARE ctrlValue
+
+
+TREEVIEW FEATURE NAME ALL GET ( featureList, "On", "On" )
+
+WHILE $i < SIZE ( featureList )
+    
+    ++i
+    
+    SET j 0
+    
+    MEASURE CONTROL NAME ALL GET ( ctrlList, $featureList[$i] )
+    
+    WHILE $j < SIZE (ctrlList)
+        
+        ++j
+        MEASURE CONTROL CHARACTERISTIC_NAME GET ( $ctrlList[$j], ctrlName, $featureList[$i] )
+        MEASURE CONTROL TOLERANCE_ZONE LIMITS GET ( $ctrlList[$j], upperTol, , , lowerTol, $featureList[$i] )
+        MEASURE CONTROL MEASURED GET ( $ctrlList[$j], ctrlValue, $featureList[$i] )
+        
+        DATA_FILE APPEND ( $XMLFilePath, "<parameter xsi:type=${_QUOTES}floatscalar${_QUOTES}",)
+        DATA_FILE APPEND ( $XMLFilePath, "name=${_QUOTES}${ctrlName}${_QUOTES}",)
+        DATA_FILE APPEND ( $XMLFilePath, "unit=${_QUOTES}mm${_QUOTES}", )
+        DATA_FILE APPEND ( $XMLFilePath, "upperlimit=${_QUOTES}${upperTol}${_QUOTES}", )
+        DATA_FILE APPEND ( $XMLFilePath, "lowerlimit=${_QUOTES}${lowerTol}${_QUOTES}", )
+        DATA_FILE APPEND ( $XMLFilePath, "value=${_QUOTES}${ctrlValue}${_QUOTES}/>${_NEWLINE}", )
+        
+    ENDWHILE
+    
+ENDWHILE
+
+
+DATA_FILE APPEND ( $XMLFilePath, "</parameters> </cycle> </sigmacollect>", )
+

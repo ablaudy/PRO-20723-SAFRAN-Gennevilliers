@@ -1,0 +1,273 @@
+version "6.0"
+#===============================================
+# ---- InnovMetric Software Inc.
+# ---- Module  :    PolyWorks|Inspector
+# ---- Version :    2022 IR10 (build 5524)
+# ---- Date    :    jeudi 8 juin 2023 - 08:25:09
+#-----------------------------------------------
+
+#VARIABLES
+
+DECLARE diagBox
+DECLARE btnValid 0
+DECLARE reference ""
+DECLARE indicePlan ""
+DECLARE numDelesteur ""
+DECLARE dateUsi "AAAA-MM-JJ"
+DECLARE jourUsi
+DECLARE dateCtrl "AAAA-MM-JJ"
+DECLARE delesteur ""
+DECLARE chxCtrlDim ""
+DECLARE prelevement 
+DECLARE OF ""
+DECLARE OP ""
+DECLARE serial ""
+DECLARE parameterFile "C:\Users\Antoine\Documents\Customization Project\Projects\PRO-5968 - SAE Genevilliers - Export Resultats  XML\Dev\Macro\parametres.txt"
+DECLARE errorStatus
+
+
+#LISTES DE VALEURS
+
+DECLARE listeNumDelesteur
+DATA_FILE READ LINE_FIELDS ( $parameterFile, 16, listeNumDelesteur, " ", "Off" )
+DECLARE listeDelesteur
+DATA_FILE READ LINE_FIELDS ( $parameterFile, 18, listeDelesteur, " ", "Off" )
+DECLARE listeOP
+DATA_FILE READ LINE_FIELDS ( $parameterFile, 20, listeOP, " ", "Off" )
+DECLARE listePrelevement
+DATA_FILE READ LINE_FIELDS ( $parameterFile, 24, listePrelevement, "!_!", "Off" )
+
+#RECUPERATION VALEUR FICHIER DE PARAMETRAGE
+
+
+
+WHILE $btnValid == 0
+    
+    #CREATION DIALOGBOX
+    
+    MACRO INPUT DIALOG_BOX DEFINE ( diagBox, "Informations Contrôle" )
+    
+    MACRO INPUT DIALOG_BOX EDITBOX STRING ( $diagBox, "Identifiant Gamme : ", $reference )
+    MACRO INPUT DIALOG_BOX EDITBOX STRING ( $diagBox, "Ordre Fabrication : ", $OF )
+    MACRO INPUT DIALOG_BOX EDITBOX STRING ( $diagBox, "N°OP : ", $OP)
+    MACRO INPUT DIALOG_BOX EDITBOX STRING ( $diagBox, "Serial : ", $serial )
+    MACRO INPUT DIALOG_BOX EDITBOX STRING ( $diagBox, "Indice Plan : ", $indicePlan )
+    MACRO INPUT DIALOG_BOX DROP_DOWN_LIST ( $diagBox, "Delesteur : ", "Off", $listeDelesteur )
+    MACRO INPUT DIALOG_BOX EDITBOX STRING ( $diagBox, "N° DC Delesteur : ", $numDelesteur)      
+    MACRO INPUT DIALOG_BOX EDITBOX STRING ( $diagBox, "Date Usinage : ", "AAAA/MM/JJ" )   
+    MACRO INPUT DIALOG_BOX RADIO_GROUP ( $diagBox, "Ctrl Dim : ", {"Avant Macro", "Après Macro"}, $chxCtrlDim )
+    MACRO INPUT DIALOG_BOX DROP_DOWN_LIST ( $diagBox, "Origine Prélèvement", "Off", $listePrelevement, $prelevement )
+    
+    
+    
+    MACRO INPUT DIALOG_BOX SHOW ( $diagBox, "Valider", "Annuler", btnValid, reference, OF, OP, serial, indicePlan, delesteur, numDelesteur,  dateUsi, chxCtrlDim, prelevement )
+    
+    IF $btnValid == 0
+        
+        MACRO END 
+        
+    ENDIF
+    
+    MACRO STRING SPLIT ( $dateUsi, "/", dateUsi )
+    SET dateUsi "${dateUsi[1]}-${dateUsi[2]}-${dateUsi[3]}"
+    
+    IF $reference == "" OR $OF == "" OR $serial == "" 
+        
+        MACRO INPUT DIALOG_BOX DEFINE ( diagBox, "Erreur" )
+        MACRO INPUT DIALOG_BOX LABEL ( $diagBox, "Un ou plusieurs éléments manquants doivent être renseignés : " )
+        
+        IF $reference == ""
+            
+            MACRO INPUT DIALOG_BOX LABEL ( $diagBox, " - Identifiant Gamme" )
+            
+        ENDIF
+        
+        IF $OF == ""
+            
+            MACRO INPUT DIALOG_BOX LABEL ( $diagBox, " - OF" )
+            
+        ENDIF
+        
+        IF $serial == ""
+            
+            MACRO INPUT DIALOG_BOX LABEL ( $diagBox, " - Serial" )
+            
+        ENDIF
+        
+        
+        MACRO INPUT DIALOG_BOX SHOW ( $diagBox, "Retour", ,btnValid )
+        
+        SET btnValid 0
+        
+        CONTINUE
+        
+    ELSEIF $indicePlan == "" OR $numDelesteur == "" OR $delesteur == "" OR $prelevement == ""  OR $OP == "" OR $dateUsi == ""
+        
+        SET btnValid 0
+        
+        MACRO INPUT DIALOG_BOX DEFINE ( diagBox, "Warning")
+        MACRO INPUT DIALOG_BOX LABEL ( $diagBox, "Un ou plusieurs éléments n'ont pas été renseignés. Voulez-vous continuer ?"  )
+        
+        IF $indicePlan == ""
+            
+            MACRO INPUT DIALOG_BOX LABEL ( $diagBox, " - Indice Plan" )
+            
+        ENDIF
+        
+        IF $numDelesteur == ""
+            
+            MACRO INPUT DIALOG_BOX LABEL ( $diagBox, " - N° DC Délesteur" )
+            
+        ENDIF
+        
+        IF $prelevement == ""
+            
+            MACRO INPUT DIALOG_BOX LABEL ( $diagBox, " - Origine Prélèvement" )
+            
+        ENDIF
+        
+        
+        IF $dateUsi == ""
+            
+            MACRO INPUT DIALOG_BOX LABEL ( $diagBox, " - Date Usinage" )
+            
+        ENDIF
+        
+        IF $OP == ""
+            
+            MACRO INPUT DIALOG_BOX LABEL ( $diagBox, " - N° OP" )
+            
+        ENDIF
+        
+        MACRO INPUT DIALOG_BOX SHOW ( $diagBox, "Oui", "Non", btnValid, )
+        
+        IF $btnValid == 0
+            
+            CONTINUE
+            
+        ELSE
+            
+            IF $indicePlan == ""
+                
+                SET indicePlan "vide"
+                
+            ENDIF
+            
+            IF $numDelesteur == ""
+                
+                SET numDelesteur "vide"
+                
+            ENDIF
+            
+            IF $prelevement == ""
+                
+                SET prelevement "vide"
+                
+            ENDIF
+            
+            
+            IF $dateUsi == ""
+                
+                SET dateUsi "vide"
+                
+            ENDIF
+            
+            IF $OP == ""
+                
+                SET OP "vide"
+                
+            ENDIF
+            
+            
+        ENDIF
+        
+        
+        
+    ENDIF
+    
+    
+    SET btnValid 0
+    
+    MACRO INPUT DIALOG_BOX DEFINE ( diagBox, "Informations Contrôle" )
+    
+    MACRO INPUT DIALOG_BOX LABEL ( $diagBox, "Identifiant Gamme : ${reference}")
+    MACRO INPUT DIALOG_BOX LABEL ( $diagBox, "Serial : ${serial}")
+    MACRO INPUT DIALOG_BOX LABEL ( $diagBox, "Indice Plan : ${indicePlan}")
+    MACRO INPUT DIALOG_BOX LABEL ( $diagBox, "N°DC Delesteur : ${numDelesteur}")
+    MACRO INPUT DIALOG_BOX LABEL ( $diagBox, "Date Usinage : ${dateUsi}")
+    MACRO INPUT DIALOG_BOX LABEL ( $diagBox, "Delesteur : ${delesteur}")
+    MACRO INPUT DIALOG_BOX LABEL ( $diagBox, "Ctrl Dim : ${chxCtrlDim}")
+    MACRO INPUT DIALOG_BOX LABEL ( $diagBox, "Origine Prélèvement : ${prelevement}")
+    MACRO INPUT DIALOG_BOX LABEL ( $diagBox, "Ordre Fabrication : ${OF}")
+    MACRO INPUT DIALOG_BOX LABEL ( $diagBox, "N° OP : ${OP}")
+    
+    
+    
+    MACRO INPUT DIALOG_BOX SHOW ( $diagBox, "Confirmer", "Corriger", btnValid,  )
+    
+    
+    
+    
+ENDWHILE
+
+DECLARE annee
+DECLARE mois
+DECLARE jour
+DECLARE heure
+
+SYSTEM DATE_TIME GET ( annee, mois, jour)
+
+IF EXPR ( 9 - $mois ) >= 0
+    
+    SET mois "0${mois}"
+    
+ENDIF
+
+
+IF EXPR ( 9 - $jour ) >= 0
+    
+    SET jour "0${jour}"   
+    
+    
+ENDIF
+
+SET dateCtrl "${annee}-${mois}-${jour}"
+
+
+
+DECLARE reponse
+MACRO INPUT QUESTION ( reponse, "La date de contrôle est ${dateCtrl}")
+
+WHILE $reponse == 0
+    
+    MACRO INPUT MULTIPLE_PARAMETERS ( "Date Contrôle", "Veuillez indiquer les champs suivant pour définir la date de contrôle", {"integer", "Année : ", $annee, "integer", "Mois : ", $mois, "integer", "Jour : ",$jour}, annee, mois, jour )
+    
+    MACRO GET_ERROR_STATUS ( errorStatus,  )
+    
+    IF $errorStatus == "Error"
+        
+        MACRO END 
+        
+    ENDIF
+    
+    
+    SET dateCtrl "${annee}-${mois}-${jour}"
+    
+    MACRO INPUT QUESTION ( reponse, "La date de contrôle est ${dateCtrl}")
+    
+ENDWHILE
+
+
+
+
+PIECE PROPERTIES CUSTOM ADD ( , "Identifiant Gamme", $reference )
+PIECE PROPERTIES CUSTOM ADD ( , "Indice Plan", $indicePlan )
+PIECE PROPERTIES CUSTOM ADD ( , "N° DC Délesteur", $numDelesteur )
+PIECE PROPERTIES CUSTOM ADD ( , "Date Usinage", $dateUsi )
+PIECE PROPERTIES CUSTOM ADD ( , "Date Contrôle", $dateCtrl )
+PIECE PROPERTIES CUSTOM ADD ( , "Delesteur", $delesteur )
+PIECE PROPERTIES CUSTOM ADD ( , "Contrôle Dim", $chxCtrlDim )
+PIECE PROPERTIES CUSTOM ADD ( , "Prélèvement", $prelevement )
+PIECE PROPERTIES CUSTOM ADD ( , "Ordre Fab", $OF )
+PIECE PROPERTIES CUSTOM ADD ( , "Serial", $serial )
+PIECE PROPERTIES CUSTOM ADD ( , "OP", $OP )
